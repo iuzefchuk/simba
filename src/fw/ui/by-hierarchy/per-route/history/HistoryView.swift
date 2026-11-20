@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ResultView: View {
+struct HistoryView: View {
     @Environment(StatusMenuViewStore.self) private var store
     @State private var copiedMessage: String?
     @State private var copiedMessageTask: Task<Void, Never>?
@@ -11,10 +11,8 @@ struct ResultView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if report != nil {
-                header
-                Divider()
-            }
+            header
+            Divider()
             content
             Divider()
             footer
@@ -25,6 +23,9 @@ struct ResultView: View {
         @Bindable var store = store
         return HStack {
             Picker("Report", selection: $store.selectedReportID) {
+                if store.reports.isEmpty {
+                    Text(title(of: Date.now)).tag(Optional<Report.ID>.none)
+                }
                 ForEach(store.reports.reversed()) { report in
                     Text(title(of: report)).tag(Optional(report.id))
                 }
@@ -41,20 +42,24 @@ struct ResultView: View {
         if let report, !report.entries.isEmpty {
             List {
                 ForEach(report.entries) { entry in
-                    ResultRowView(entry: entry)
+                    HistoryRowView(entry: entry)
                         .contextMenu {
-                            Button("Copy") { copy(entry.text, message: "Copied") }
                             Button("Delete", role: .destructive) { store.remove(entry.id, from: report.id) }
                         }
                 }
             }
             .listStyle(.inset)
         } else {
-            ContentUnavailableView(
-                "No entries yet",
-                systemImage: "tray",
-                description: Text("Answers to the hourly prompt will show up here."))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ContentUnavailableView {
+                Label {
+                    Text("No entries yet")
+                } icon: {
+                    Image(.catRolling220)
+                }
+            } description: {
+                Text("Answers to the hourly prompt will show up here.")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -66,7 +71,7 @@ struct ResultView: View {
                     .transition(.opacity)
             }
             Spacer()
-            Button("Copy All") {
+            Button("Copy") {
                 guard let report else { return }
                 let count = report.entries.count
                 copy(text(of: report), message: "Copied \(count) \(count == 1 ? "entry" : "entries")")
@@ -91,30 +96,30 @@ struct ResultView: View {
         }
     }
 
-    private func title(of report: Report) -> String {
-        let calendar = Calendar.current
+    private func title(of date: Date) -> String {
         var style = Date.FormatStyle.dateTime.weekday(.wide).month(.abbreviated).day()
-        if !calendar.isDate(report.startedAt, equalTo: .now, toGranularity: .year) {
+        if !Calendar.current.isDate(date, equalTo: .now, toGranularity: .year) {
             style = style.year()
         }
-        let title = report.startedAt.formatted(style)
+        return date.formatted(style)
+    }
+
+    private func title(of report: Report) -> String {
+        let calendar = Calendar.current
+        let title = title(of: report.startedAt)
         let sharesDay = store.reports.contains {
             $0.id != report.id && calendar.isDate($0.startedAt, inSameDayAs: report.startedAt)
         }
         return sharesDay ? "\(title) · \(report.startedAt.formatted(date: .omitted, time: .shortened))" : title
     }
 
-    private func line(of entry: Entry) -> String {
-        "\(entry.date.formatted(date: .omitted, time: .shortened)) – \(entry.text)"
-    }
-
     private func text(of report: Report) -> String {
-        report.entries.map(line(of:)).joined(separator: "\n")
+        report.entries.map { "- \($0.text)\n" }.joined()
     }
 }
 
 #Preview {
-    ResultView()
+    HistoryView()
         .environment(StatusMenuViewStore.preview)
         .frame(width: 520, height: 560)
 }

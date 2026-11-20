@@ -82,7 +82,7 @@ final class StatusMenuViewStore {
         if promptedAt != nil { answerPrompt() }
         guard let report = change({ try $0.end(at: date) }) else { return }
         cancelNextPrompt()
-        showResult(report.id)
+        showHistory(report.id)
     }
 
     func prompt(at date: Date = .now) {
@@ -112,9 +112,9 @@ final class StatusMenuViewStore {
         change { try $0.remove(entryID, from: reportID) }
     }
 
-    func showResult(_ reportID: Report.ID? = nil) {
+    func showHistory(_ reportID: Report.ID? = nil) {
         selectedReportID = reportID ?? latestReport?.id
-        windows.open(.result)
+        windows.open(.history)
     }
 
     func showSetup() {

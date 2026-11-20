@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ResultRowView: View {
+struct HistoryRowView: View {
     let entry: Entry
 
     var body: some View {
@@ -19,7 +19,7 @@ struct ResultRowView: View {
 
 #Preview {
     if let entry = StatusMenuViewStore.preview.latestReport?.entries.first {
-        ResultRowView(entry: entry)
+        HistoryRowView(entry: entry)
             .padding()
     }
 }

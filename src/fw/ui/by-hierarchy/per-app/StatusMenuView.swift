@@ -5,16 +5,19 @@ struct StatusMenuView: View {
 
     var body: some View {
         if store.isLogging {
-            Button("Trigger prompt") { store.prompt() }
+            Button("Log") { store.prompt() }
+            Button("Sleep") { store.endLogging() }
         } else {
-            Button("Start logging") { store.startLogging() }
+            Button("Wake & log") {
+                store.startLogging()
+                store.prompt()
+            }
         }
-        Button("Show result") { store.showResult() }
         Divider()
-        Button("Setup") { store.showSetup() }
+        Button("History") { store.showHistory() }
+        Button("Settings") { store.showSetup() }
         Divider()
         Button("Quit") { NSApp.terminate(nil) }
-            .keyboardShortcut("q")
     }
 }
 

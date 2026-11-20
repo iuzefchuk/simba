@@ -9,7 +9,7 @@ struct SimbaApp: App {
         let windows = WindowCoordinator()
         let store = StatusMenuViewStore(storage: JSONStorage.applicationSupport, scheduling: TimerScheduling(), windows: windows)
         windows.register(.prompt) { PromptRoute(store) }
-        windows.register(.result) { ResultRoute(store) }
+        windows.register(.history) { HistoryRoute(store) }
         windows.register(.setup) { SetupRoute(store) }
         let statusItem = StatusItem(store: store)
         self.statusItem = statusItem

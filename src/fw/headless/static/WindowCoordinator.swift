@@ -4,7 +4,7 @@ import AppKit
 final class WindowCoordinator {
     enum Destination {
         case prompt
-        case result
+        case history
         case setup
     }
 
