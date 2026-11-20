@@ -6,7 +6,7 @@ final class SetupRoute: NSWindowController {
         let host = NSHostingController(rootView: SetupView().environment(store))
         let window = NSWindow(contentViewController: host)
         window.styleMask = [.titled, .closable]
-        window.title = "Set Up Simba"
+        window.title = "Setup"
         window.isReleasedWhenClosed = false
         window.setContentSize(host.view.fittingSize)
         window.center()

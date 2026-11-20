@@ -4,23 +4,16 @@ struct StatusMenuView: View {
     @Environment(StatusMenuViewStore.self) private var store
 
     var body: some View {
-        @Bindable var store = store
-        if let report = store.openReport {
-            if let next = store.nextPromptAt {
-                Text("^[\(report.entries.count) entry](inflect: true) · next at \(next.formatted(date: .omitted, time: .shortened))")
-                Divider()
-            }
-            Button("Add Entry…") { store.prompt() }
-            Button("Finish & Show Result") { store.endLogging() }
+        if store.isLogging {
+            Button("Trigger prompt") { store.prompt() }
         } else {
-            Button("Start Logging Manually") { store.startLogging() }
+            Button("Start logging") { store.startLogging() }
         }
-        Button("Show Result…") { store.showResult() }
+        Button("Show result") { store.showResult() }
         Divider()
-        Toggle("Launch at Login", isOn: $store.launchesAtLogin)
-        Button("Work Hours…") { store.showSetup() }
+        Button("Setup") { store.showSetup() }
         Divider()
-        Button("Quit Simba") { NSApp.terminate(nil) }
+        Button("Quit") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
     }
 }

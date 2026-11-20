@@ -4,35 +4,32 @@ struct PromptView: View {
     @Environment(StatusMenuViewStore.self) private var store
     @FocusState private var isFieldFocused: Bool
 
-    private var canSave: Bool { Entry.normalized(store.draft) != nil }
+    private var canLog: Bool { Entry.normalized(store.draft) != nil }
 
     var body: some View {
         @Bindable var store = store
-        HStack(alignment: .top, spacing: 14) {
-            MarkView(size: 46)
-                .padding(.top, 2)
-            VStack(alignment: .leading, spacing: 8) {
+        HStack(alignment: .top, spacing: 12) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 40, height: 40)
+            VStack(alignment: .leading, spacing: 10) {
                 TextField("What are you doing right now?", text: $store.draft)
                     .textFieldStyle(.roundedBorder)
                     .focused($isFieldFocused)
-                    .onSubmit { if canSave { store.answerPrompt() } }
+                    .onSubmit { if canLog { store.answerPrompt() } }
                 HStack {
                     Spacer()
                     Button("Skip") { store.skipPrompt() }
                         .keyboardShortcut(.cancelAction)
-                    Button("Save") { store.answerPrompt() }
+                    Button("Log") { store.answerPrompt() }
                         .buttonStyle(.borderedProminent)
-                        .tint(Color(.chestnut))
-                        .disabled(!canSave)
+                        .disabled(!canLog)
                 }
-                .controlSize(.small)
             }
         }
         .padding(16)
         .frame(width: 420)
-        .background(Color(.cream), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .strokeBorder(Color(.chestnut).opacity(0.25)))
+        .glassEffect(.regular, in: .rect(cornerRadius: 20))
         .onAppear { isFieldFocused = true }
         .onChange(of: store.promptedAt) { _, _ in isFieldFocused = true }
     }

@@ -10,7 +10,7 @@ final class ResultRoute: NSWindowController {
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false)
-        window.title = "Simba"
+        window.title = "Result"
         window.isReleasedWhenClosed = false
         window.contentViewController = host
         window.setContentSize(NSSize(width: 520, height: 560))

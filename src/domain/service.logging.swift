@@ -53,6 +53,10 @@ extension [Report] {
         try changeOpen { try $0.add(entry) }
     }
 
+    mutating func skip(at date: Date) throws -> Report {
+        try changeOpen { try $0.skip(at: date) }
+    }
+
     mutating func remove(_ entryID: Entry.ID, from reportID: Report.ID) throws -> Report {
         guard let index = firstIndex(where: { $0.id == reportID }) else { throw Report.Rejection.noSuchReport }
         try self[index].remove(entryID)

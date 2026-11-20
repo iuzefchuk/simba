@@ -5,26 +5,12 @@ struct SetupView: View {
 
     var body: some View {
         @Bindable var store = store
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 14) {
-                MarkView(size: 64)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Simba")
-                        .font(.title.weight(.semibold))
-                    Text("Hourly entries during your work hours.")
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 12) {
-                GridRow {
-                    Text("Days")
-                        .foregroundStyle(.secondary)
+        Form {
+            Section("Work schedule") {
+                LabeledContent("Days") {
                     SetupDaysView(days: days)
                 }
-                GridRow {
-                    Text("Hours")
-                        .foregroundStyle(.secondary)
+                LabeledContent("Hours") {
                     HStack {
                         DatePicker("From", selection: start, displayedComponents: .hourAndMinute)
                         Text("to")
@@ -33,18 +19,14 @@ struct SetupView: View {
                     .labelsHidden()
                 }
             }
-
-            Text("Simba starts logging when your work hours begin and asks what you're doing every hour. When they end, every answer appears in one list you can copy.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Toggle("Launch at Login, so Simba is running when work starts", isOn: $store.launchesAtLogin)
-                .toggleStyle(.checkbox)
+            Section {
+                Toggle("Launch at login", isOn: $store.launchesAtLogin)
+            }
         }
-        .padding(24)
-        .frame(width: 480)
-        .background(Color(.ivory))
+        .formStyle(.grouped)
+        .scrollDisabled(true)
+        .frame(width: 500)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var days: Binding<Set<Int>> {

@@ -9,7 +9,6 @@ final class StatusMenuViewStore {
     private static let workHoursKey = "work-hours"
 
     private(set) var reports: [Report]
-    private(set) var nextPromptAt: Date?
     private(set) var promptedAt: Date?
     var draft = ""
     var selectedReportID: Report.ID?
@@ -68,6 +67,7 @@ final class StatusMenuViewStore {
         if isFirstLaunch {
             isFirstLaunch = false
             saveWorkHours()
+            launchesAtLogin = true
             showSetup()
         }
         followWorkHours()
@@ -91,13 +91,18 @@ final class StatusMenuViewStore {
     }
 
     func answerPrompt() {
-        if let promptedAt, let entry = Entry(date: promptedAt, text: draft) {
-            change { try $0.add(entry) }
-        }
-        skipPrompt()
+        guard promptedAt != nil else { return }
+        guard let entry = Entry(date: .now, text: draft) else { return skipPrompt() }
+        change { try $0.add(entry) }
+        closePrompt()
     }
 
     func skipPrompt() {
+        if promptedAt != nil { change { try $0.skip(at: .now) } }
+        closePrompt()
+    }
+
+    private func closePrompt() {
         promptedAt = nil
         draft = ""
         windows.close(.prompt)
@@ -147,7 +152,6 @@ final class StatusMenuViewStore {
     private func scheduleNextPrompt() {
         if let promptScheduleID { scheduling.cancel(promptScheduleID) }
         let fireDate = Self.nextPrompt(after: .now)
-        nextPromptAt = fireDate
         promptScheduleID = scheduling.schedule(at: fireDate, tolerance: 15) { [weak self] in
             Task { @MainActor in self?.promptFired(scheduledFor: fireDate) }
         }
@@ -155,6 +159,7 @@ final class StatusMenuViewStore {
 
     private func promptFired(scheduledFor date: Date) {
         guard isLogging else { return }
+        if promptedAt != nil { change { try $0.skip(at: date) } }
         prompt(at: date)
         scheduleNextPrompt()
     }
@@ -162,7 +167,6 @@ final class StatusMenuViewStore {
     private func cancelNextPrompt() {
         if let promptScheduleID { scheduling.cancel(promptScheduleID) }
         promptScheduleID = nil
-        nextPromptAt = nil
     }
 
     @discardableResult

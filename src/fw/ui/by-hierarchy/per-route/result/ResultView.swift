@@ -11,41 +11,29 @@ struct ResultView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
+            if report != nil {
+                header
+                Divider()
+            }
             content
             Divider()
             footer
         }
-        .background(Color(.ivory))
     }
 
-    @ViewBuilder
     private var header: some View {
         @Bindable var store = store
-        HStack(spacing: 14) {
-            MarkView(size: 44)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(report.map { title(of: $0) } ?? "Simba")
-                    .font(.title3.weight(.semibold))
-                if let report {
-                    Text("\(timeRange(of: report)) · ^[\(report.entries.count) entry](inflect: true)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+        return HStack {
+            Picker("Report", selection: $store.selectedReportID) {
+                ForEach(store.reports.reversed()) { report in
+                    Text(title(of: report)).tag(Optional(report.id))
                 }
             }
+            .labelsHidden()
+            .fixedSize()
             Spacer()
-            if store.reports.count > 1 {
-                Picker("Report", selection: $store.selectedReportID) {
-                    ForEach(store.reports.reversed()) { report in
-                        Text(title(of: report)).tag(Optional(report.id))
-                    }
-                }
-                .labelsHidden()
-                .frame(width: 170)
-            }
         }
-        .padding(16)
+        .padding(12)
     }
 
     @ViewBuilder
@@ -53,30 +41,20 @@ struct ResultView: View {
         if let report, !report.entries.isEmpty {
             List {
                 ForEach(report.entries) { entry in
-                    ResultRowView(entry: entry, onCopy: { copy(entry.text, message: "Copied") })
+                    ResultRowView(entry: entry)
                         .contextMenu {
                             Button("Copy") { copy(entry.text, message: "Copied") }
-                            Button("Copy with Time") { copy(line(of: entry), message: "Copied") }
-                            Divider()
                             Button("Delete", role: .destructive) { store.remove(entry.id, from: report.id) }
                         }
                 }
             }
             .listStyle(.inset)
-            .scrollContentBackground(.hidden)
         } else {
-            ContentUnavailableView {
-                Label {
-                    Text("No entries yet")
-                } icon: {
-                    MarkView(size: 64)
-                }
-            } description: {
-                Text(report == nil
-                     ? "Logging starts with your work hours, or from the menu bar."
-                     : "Answers to the hourly prompt will show up here.")
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ContentUnavailableView(
+                "No entries yet",
+                systemImage: "tray",
+                description: Text("Answers to the hourly prompt will show up here."))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -94,7 +72,6 @@ struct ResultView: View {
                 copy(text(of: report), message: "Copied \(count) \(count == 1 ? "entry" : "entries")")
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color(.chestnut))
             .keyboardShortcut("c", modifiers: [.command, .shift])
             .disabled(report?.entries.isEmpty ?? true)
         }
@@ -125,12 +102,6 @@ struct ResultView: View {
             $0.id != report.id && calendar.isDate($0.startedAt, inSameDayAs: report.startedAt)
         }
         return sharesDay ? "\(title) · \(report.startedAt.formatted(date: .omitted, time: .shortened))" : title
-    }
-
-    private func timeRange(of report: Report) -> String {
-        let start = report.startedAt.formatted(date: .omitted, time: .shortened)
-        guard let endedAt = report.endedAt else { return "Started \(start)" }
-        return "\(start) – \(endedAt.formatted(date: .omitted, time: .shortened))"
     }
 
     private func line(of entry: Entry) -> String {

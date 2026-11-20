@@ -3,7 +3,7 @@ import SwiftUI
 @main
 struct SimbaApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    private let store: StatusMenuViewStore
+    private let statusItem: StatusItem
 
     init() {
         let windows = WindowCoordinator()
@@ -11,17 +11,17 @@ struct SimbaApp: App {
         windows.register(.prompt) { PromptRoute(store) }
         windows.register(.result) { ResultRoute(store) }
         windows.register(.setup) { SetupRoute(store) }
-        self.store = store
-        appDelegate.onLaunch = { store.appDidLaunch() }
+        let statusItem = StatusItem(store: store)
+        self.statusItem = statusItem
+        appDelegate.onLaunch = {
+            statusItem.install()
+            store.appDidLaunch()
+        }
     }
 
     var body: some Scene {
-        MenuBarExtra {
-            StatusMenuView()
-                .environment(store)
-        } label: {
-            Image(store.isLogging ? .catMeowing18 : .catCalm18)
+        Settings {
+            EmptyView()
         }
-        .menuBarExtraStyle(.menu)
     }
 }
