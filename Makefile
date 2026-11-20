@@ -6,17 +6,17 @@ DERIVED    := $(BUILD)/DerivedData
 DEBUG_APP  := $(DERIVED)/Build/Products/Debug/$(APP).app
 XCODEBUILD := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED) -quiet
 
-.PHONY: all build test release run run-fast stop install icons masters layers clean open help
+.PHONY: all project build release run run-fast stop install clean open help
 
 all: build
 
-build: ## Debug build
+project: ## Generate Simba.xcodeproj from project.yml (needs xcodegen)
+	xcodegen generate --quiet --use-cache --cache-path $(BUILD)/xcodegen-cache
+
+build: project ## Debug build
 	$(XCODEBUILD) -configuration Debug build
 
-test: ## Run the unit tests
-	$(XCODEBUILD) -configuration Debug test
-
-release: ## Release build into build/Simba.app
+release: project ## Release build into build/Simba.app
 	$(XCODEBUILD) -configuration Release CONFIGURATION_BUILD_DIR=$(abspath $(BUILD)) build
 	@echo "built $(BUILD)/$(APP).app"
 
@@ -34,19 +34,10 @@ install: release stop ## Copy the release build into /Applications and launch it
 	cp -R "$(BUILD)/$(APP).app" /Applications/
 	open "/Applications/$(APP).app"
 
-icons: ## Compose the app icon, mark and menu bar images from tools/artwork/masters (ICON_BG=white|olive|khaki|light)
-	./tools/artwork/build.sh
+clean: ## Remove build products and the generated project
+	rm -rf $(BUILD) $(PROJECT)
 
-masters: ## Rebuild the masters in tools/artwork from the photos in tools/artwork/sources, then the icons
-	./tools/artwork/build.sh --masters
-
-layers: ## Check src/ against the layout: folders, names, imports, and the dependency rules
-	./tools/check-layers.sh
-
-clean: ## Remove build products
-	rm -rf $(BUILD)
-
-open: ## Open the project in Xcode
+open: project ## Open the project in Xcode
 	open $(PROJECT)
 
 help: ## Show this help

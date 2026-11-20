@@ -1,6 +1,6 @@
 import Foundation
 
-struct Report: Identifiable, Equatable {
+struct Report: Identifiable, Equatable, Codable {
     enum Rejection: Error {
         case entryBeforeStart
         case duplicateEntry
@@ -24,6 +24,7 @@ struct Report: Identifiable, Equatable {
     }
 
     static let staleAfter: TimeInterval = 16 * 3600
+    static let schemaVersion = 1
 
     let id: UUID
     let startedAt: Date
@@ -33,13 +34,6 @@ struct Report: Identifiable, Equatable {
     init(startedAt: Date) {
         id = UUID()
         self.startedAt = startedAt
-    }
-
-    init(stored id: UUID, startedAt: Date, endedAt: Date?, entries: [Entry]) {
-        self.id = id
-        self.startedAt = startedAt
-        self.endedAt = endedAt
-        self.entries = entries
     }
 
     var isOpen: Bool { endedAt == nil }

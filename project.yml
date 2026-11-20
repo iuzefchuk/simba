@@ -1,0 +1,41 @@
+name: Simba
+
+options:
+  deploymentTarget:
+    macOS: "14.0"
+  developmentLanguage: en
+
+settings:
+  SWIFT_VERSION: "5.0"
+  MARKETING_VERSION: "1.0"
+  CURRENT_PROJECT_VERSION: 1
+  CODE_SIGN_IDENTITY: "-"
+  CODE_SIGN_STYLE: Automatic
+  GENERATE_INFOPLIST_FILE: YES
+  DEAD_CODE_STRIPPING: YES
+  ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+
+targets:
+  Simba:
+    type: application
+    platform: macOS
+    sources:
+      - path: assets
+        type: syncedFolder
+      - path: src/domain
+        type: syncedFolder
+      - path: src/platform
+        type: syncedFolder
+      - path: src/fw
+        type: syncedFolder
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.iuzefchuk.Simba
+      ASSETCATALOG_COMPILER_APPICON_NAME: cat_meowing_squircle
+      ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: chestnut
+      ENABLE_APP_SANDBOX: YES
+      ENABLE_HARDENED_RUNTIME: YES
+      ENABLE_PREVIEWS: YES
+      INFOPLIST_KEY_CFBundleDisplayName: Simba
+      INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+      INFOPLIST_KEY_LSUIElement: YES
+    scheme: {}
